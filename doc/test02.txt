@@ -20,8 +20,7 @@ const int FwdPin_A = 26;
 const int BwdPin_A = 25; 
 
 BluetoothSerial BT; // Bluetooth object
-GMotor2<DRIVER2WIRE> motorB(FwdPin_B, BwdPin_B);
-GMotor2<DRIVER2WIRE> motorA(FwdPin_A, BwdPin_A);
+GMotor2<DRIVER2WIRE> motor(FwdPin_B, BwdPin_B);
 
 struct Str
 {
@@ -52,28 +51,42 @@ void callback_function(esp_spp_cb_event_t event, esp_spp_cb_param_t *param) {
 
       if(buf.cmd==CMD_FORWARD)
       {
-        motorA.setSpeed(buf.val);
-        motorB.setSpeed(buf.val);
-      }
-      if(buf.cmd==CMD_RIGHT)
-      {
-        motorA.setSpeed(buf.val);
-        motorB.setSpeed(-buf.val);
-      }
-      if(buf.cmd==CMD_LEFT)
-      {
-        motorA.setSpeed(-buf.val);
-        motorB.setSpeed(buf.val);
+        analogWrite(FwdPin_B, 0); 
+        digitalWrite(BwdPin_B, LOW);
+
+        analogWrite(FwdPin_A, 0); 
+        digitalWrite(BwdPin_A, LOW);
+
+        delay(100);
+
+        analogWrite(FwdPin_B, buf.val); 
+        digitalWrite(BwdPin_B, LOW);
+
+        analogWrite(FwdPin_A, buf.val); 
+        digitalWrite(BwdPin_A, LOW);
+        delay(100);
       }
       if(buf.cmd==CMD_BACKWARD)
       {
-        motorA.setSpeed(-buf.val);
-        motorB.setSpeed(-buf.val);
+        digitalWrite(FwdPin_B, LOW);
+        digitalWrite(BwdPin_B, LOW);
+        delay(100);
+
+        digitalWrite(FwdPin_B, LOW); 
+        analogWrite(BwdPin_B, buf.val);
+
+        digitalWrite(FwdPin_A, LOW); 
+        analogWrite(BwdPin_A, buf.val);
       }
       if(buf.cmd==CMD_STOP)
       {
-        motorA.brake();
-        motorB.brake();
+        analogWrite(FwdPin_B, 0); 
+        digitalWrite(BwdPin_B, LOW);
+
+        analogWrite(FwdPin_A, 0); 
+        digitalWrite(BwdPin_A, LOW);
+
+        delay(100);
       }
     }
   }
@@ -81,8 +94,7 @@ void callback_function(esp_spp_cb_event_t event, esp_spp_cb_param_t *param) {
 
 void setup() {
 
-  motorB.setMinDuty(70);
-  motorA.setMinDuty(70);
+  motor.setMinDuty(70);
   
   pinMode(FwdPin_B, OUTPUT);   
   pinMode(BwdPin_B, OUTPUT);   
@@ -97,4 +109,39 @@ void setup() {
 
 }
 void loop() {
+
+  // analogWrite(FwdPin_B, SPD); 
+  // digitalWrite(BwdPin_B, LOW);
+
+  // analogWrite(FwdPin_A, SPD); 
+  // digitalWrite(BwdPin_A, LOW);
+
+  
+  // delay(3000);
+  
+  // analogWrite(FwdPin_B, 0);
+  // digitalWrite(BwdPin_B, LOW);
+
+  // analogWrite(FwdPin_A, 0);
+  // digitalWrite(BwdPin_A, LOW);
+
+  
+  // delay(1000);
+  
+  // digitalWrite(FwdPin_B, LOW);
+  // analogWrite(BwdPin_B, SPD);
+  
+  // digitalWrite(FwdPin_A, LOW);
+  // analogWrite(BwdPin_A, SPD);
+  
+  // delay(3000);
+  
+  // analogWrite(BwdPin_B, 0);
+  // digitalWrite(BwdPin_B, LOW);
+
+  // analogWrite(BwdPin_A, 0);
+  // digitalWrite(BwdPin_A, LOW);
+
+  
+  // delay(1000);
 }

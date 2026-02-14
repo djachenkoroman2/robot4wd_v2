@@ -1,0 +1,55 @@
+#include <Arduino.h>
+#include "BluetoothSerial.h"
+#include <GyverMotor2.h>
+
+#if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
+#error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
+#endif
+
+#define CMD_FORWARD 1
+#define CMD_LEFT 4
+#define CMD_RIGHT 2
+#define CMD_BACKWARD 3
+#define CMD_STOP 5
+
+#define SPD 60
+const int FwdPin_B = 27; 
+const int BwdPin_B = 14; 
+
+const int FwdPin_A = 26; 
+const int BwdPin_A = 25; 
+
+BluetoothSerial BT; // Bluetooth object
+GMotor2<DRIVER2WIRE> motor(FwdPin_B, BwdPin_B);
+GMotor2<DRIVER2WIRE> motor2(FwdPin_A, BwdPin_A);
+
+// #include <GyverMotor2.h>
+
+// GMotor2<DRIVER2WIRE> motor(5, 6);
+// GMotor2<DRIVER2WIRE_NO_INVERT> motor(5, 6);
+// GMotor2<DRIVER2WIRE_PWM_POWER> motor(5, 6);
+// GMotor2<DRIVER3WIRE> motor(5, 6, 11);
+// GMotor2<RELAY2WIRE> motor(5, 6);
+
+void setup() {
+    motor.setMinDuty(70);  // мин. ШИМ
+    motor2.setMinDuty(70);  // мин. ШИМ
+}
+
+void loop() {
+    motor.setSpeed(10);
+    motor2.setSpeed(10);
+    delay(1000);
+    motor.setSpeed(-100);
+    motor2.setSpeed(-100);
+    delay(1000);
+    motor.setSpeed(50);
+    motor2.setSpeed(50);
+    delay(1000);
+    motor.setSpeed(255);
+    motor2.setSpeed(255);
+    delay(1000);
+    motor.brake();
+    motor2.brake();
+    delay(3000);
+}
