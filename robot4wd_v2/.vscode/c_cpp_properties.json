@@ -8,10 +8,10 @@
         {
             "name": "PlatformIO",
             "includePath": [
-                "c:/Users/roman/Desktop/robot/robot4wd_v2/include",
-                "c:/Users/roman/Desktop/robot/robot4wd_v2/src",
+                "c:/Users/roman/Desktop/robot/robot4wd_v2/robot4wd_v2/include",
+                "c:/Users/roman/Desktop/robot/robot4wd_v2/robot4wd_v2/src",
                 "C:/Users/roman/.platformio/packages/framework-arduinoespressif32/libraries/BluetoothSerial/src",
-                "c:/Users/roman/Desktop/robot/robot4wd_v2/.pio/libdeps/esp32doit-devkit-v1/GyverMotor/src",
+                "c:/Users/roman/Desktop/robot/robot4wd_v2/robot4wd_v2/.pio/libdeps/esp32doit-devkit-v1/GyverMotor/src",
                 "C:/Users/roman/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/newlib/platform_include",
                 "C:/Users/roman/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/freertos/include",
                 "C:/Users/roman/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/freertos/include/esp_additions/freertos",
@@ -239,10 +239,10 @@
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
-                    "c:/Users/roman/Desktop/robot/robot4wd_v2/include",
-                    "c:/Users/roman/Desktop/robot/robot4wd_v2/src",
+                    "c:/Users/roman/Desktop/robot/robot4wd_v2/robot4wd_v2/include",
+                    "c:/Users/roman/Desktop/robot/robot4wd_v2/robot4wd_v2/src",
                     "C:/Users/roman/.platformio/packages/framework-arduinoespressif32/libraries/BluetoothSerial/src",
-                    "c:/Users/roman/Desktop/robot/robot4wd_v2/.pio/libdeps/esp32doit-devkit-v1/GyverMotor/src",
+                    "c:/Users/roman/Desktop/robot/robot4wd_v2/robot4wd_v2/.pio/libdeps/esp32doit-devkit-v1/GyverMotor/src",
                     "C:/Users/roman/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/newlib/platform_include",
                     "C:/Users/roman/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/freertos/include",
                     "C:/Users/roman/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/freertos/include/esp_additions/freertos",
