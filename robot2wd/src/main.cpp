@@ -1,0 +1,108 @@
+#include <Arduino.h>
+#include "motor.h"
+#include "compas.h"
+#include <SoftwareSerial.h>
+
+#define TIMER1 500
+
+#define TxD 12
+#define RxD 13
+
+
+#define IDX_CMD 0
+#define IDX_VAL 1
+#define BUF_SIZE 2
+
+SoftwareSerial mySerial(RxD, TxD); // RX, TX for Bluetooth
+
+
+
+
+long Timer1=0;
+int h=0;
+byte buf[BUF_SIZE];
+
+
+
+void setup()
+{
+  mySerial.begin(9600); // For Bluetooth
+  Serial.begin(9600); // For the IDE monitor Tools -> Serial Monitor
+  SetupMotor();
+  SetupCompas();
+  Timer1=millis();
+}
+void loop()
+{
+    if (mySerial.available())
+    {
+        mySerial.readBytes(buf,2);
+        Serial.print("cmd=");
+        Serial.print(buf[IDX_CMD]);
+        Serial.print(" val=");
+        Serial.print(buf[IDX_VAL]);
+        Serial.println("");
+        switch (buf[IDX_CMD])
+        {
+        case CMD_FORWARD_A:
+            if (buf[IDX_VAL]==0) StopA();
+            ForwardA(buf[IDX_VAL]);
+            break;
+        
+        case CMD_FORWARD_B:
+            if (buf[IDX_VAL]==0) StopB();
+            ForwardB(buf[IDX_VAL]);
+            break;
+
+        case CMD_FORWARD_AB:
+            if (buf[IDX_VAL]==0) 
+            {
+                StopA();
+                StopB();
+            }
+            ForwardA(buf[IDX_VAL]);
+            ForwardB(buf[IDX_VAL]);
+            break;
+
+        case CMD_FORWARD_AB2:
+            if (buf[IDX_VAL]==0) 
+            {
+                StopA();
+                StopB();
+            }
+            ForwardA(150);
+            ForwardB(buf[IDX_VAL]);
+            break;
+
+        case CMD_RIGHT:
+            // if (buf[IDX_VAL]==0) 
+            // {
+                // StopA();
+                // StopB();
+            // }
+            Right();
+            break;
+
+        case CMD_LEFT:
+            // if (buf[IDX_VAL]==0) 
+            // {
+            //     StopA();
+            //     StopB();
+            // }
+            Left();
+            break;
+        
+        default:
+            break;
+        }
+    }
+    if (millis()-Timer1>=TIMER1)
+    {
+      h = GetHeading();
+      Serial.println(h); 
+      mySerial.print(h);
+      mySerial.print("|");
+      Timer1=millis();
+    }
+}
+

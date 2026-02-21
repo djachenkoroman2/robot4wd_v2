@@ -1,0 +1,142 @@
+#include <Arduino.h>
+#include"pins.h"
+
+
+#define SERIALSPEED 9600
+#define MESURE_INTERVAL 70
+#define PULSE_PER_REVOLUTION 20
+
+// Переменные для измерения скорости
+volatile unsigned int pulses = 0;
+unsigned long lastTime = 0;
+unsigned int rpm = 0;
+
+// Переменные для ПИД-регулирования (можно использовать просто пропорциональный)
+float targetRPM = 70;  // Желаемая скорость в RPM
+float currentRPM = 0;
+float error = 0;
+float lastError = 0;
+float integral = 0;
+float derivative = 0;
+
+// Коэффициенты ПИД-регулятора (подбираются экспериментально)
+float Kp = 0.08;  // Пропорциональный коэффициент
+float Ki = 0.05;  // Интегральный коэффициент  
+float Kd = 0.0; // Дифференциальный коэффициент
+// float Ki = 0.1;  // Интегральный коэффициент  
+// float Kd = 0.05; // Дифференциальный коэффициент
+
+// ПИД выход
+int pwmOutput = 0;
+
+// Функция прерывания для подсчета импульсов
+void countPulses() {
+  pulses++;
+};
+
+float timeInMinutes = (MESURE_INTERVAL / 1000.0) / 60.0;
+
+void setup() {
+  
+  pinMode( PIN_MOTORDRV1_ENA, OUTPUT );
+  pinMode( PIN_MOTORDRV1_IN1, OUTPUT );
+  pinMode( PIN_MOTORDRV1_IN2, OUTPUT );
+  pinMode(PIN_SPD_SENSOR_1, INPUT_PULLUP);
+  Serial.begin(SERIALSPEED); // Увеличим скорость для отладки
+  attachInterrupt(digitalPinToInterrupt(PIN_SPD_SENSOR_1), countPulses, RISING);
+
+// Инициализация
+  lastTime = millis();
+  
+  Serial.println("Система регулирования скорости двигателя");
+  Serial.println("========================================");
+}
+
+void loop() {
+  // Измерение скорости каждые measureInterval миллисекунд
+  if (millis() - lastTime >= MESURE_INTERVAL) {
+    // Отключить прерывания на время расчетов
+    noInterrupts();
+    unsigned int pulseCount = pulses;
+    pulses = 0;
+    interrupts();
+    
+    // Расчет RPM
+    // Формула: RPM = (импульсы / время в минутах) / импульсы_на_оборот
+    // время в минутах = (интервал в мс / 1000) / 60
+    
+    currentRPM = (pulseCount / timeInMinutes) / PULSE_PER_REVOLUTION;
+    
+    // ПИД-регулирование
+    error = targetRPM - currentRPM;
+    
+    // Пропорциональная составляющая
+    float proportional = Kp * error;
+    
+    // Интегральная составляющая (с антивинддапом)
+    integral += error * (MESURE_INTERVAL / 1000.0);
+    // Ограничение интегральной составляющей
+    if (integral > 255) integral = 255;
+    if (integral < -255) integral = -255;
+    float integralTerm = Ki * integral;
+    
+    // Дифференциальная составляющая
+    derivative = (error - lastError) / (MESURE_INTERVAL / 1000.0);
+    float derivativeTerm = Kd * derivative;
+    
+    // Расчет выхода ПИД-регулятора
+    float pidOutput = proportional + integralTerm + derivativeTerm;
+    
+    // Преобразование в ШИМ значение (0-255)
+    pwmOutput += pidOutput;
+    
+    // Ограничение выхода ШИМ
+    if (pwmOutput > 255) pwmOutput = 255;
+    if (pwmOutput < 0) pwmOutput = 0;
+    
+    // Применение ШИМ к двигателю
+    // analogWrite(motorPWM, pwmOutput);
+    analogWrite( PIN_MOTORDRV1_ENA, pwmOutput);
+    digitalWrite( PIN_MOTORDRV1_IN1, HIGH );
+    digitalWrite( PIN_MOTORDRV1_IN2, LOW );
+
+    // Сохранение ошибки для следующего цикла
+    lastError = error;
+    lastTime = millis();
+    
+    // Вывод информации в монитор порта
+    Serial.print("Цель: ");
+    Serial.print(targetRPM);
+    Serial.print(" RPM | Текущее: ");
+    Serial.print(currentRPM);
+    Serial.print(" RPM | ШИМ: ");
+    Serial.print(pwmOutput);
+    Serial.print(" | Ошибка: ");
+    Serial.println(error);
+  }
+  
+  // Проверка ввода с последовательного порта для изменения целевой скорости
+  if (Serial.available() > 0) {
+    String input = Serial.readStringUntil('\n');
+    targetRPM = input.toFloat();
+    Serial.print("Новая целевая скорость: ");
+    Serial.print(targetRPM);
+    Serial.println(" RPM");
+  }
+}
+
+
+// Упрощенная версия с пропорциональным регулированием (если ПИД слишком сложен)
+/*
+void simpleControlLoop() {
+  // Пропорциональный регулятор
+  error = targetRPM - currentRPM;
+  pwmOutput = Kp * error;
+  
+  // Ограничение выхода
+  if (pwmOutput > 255) pwmOutput = 255;
+  if (pwmOutput < 0) pwmOutput = 0;
+  
+  analogWrite(motorPWM, pwmOutput);
+}
+*/

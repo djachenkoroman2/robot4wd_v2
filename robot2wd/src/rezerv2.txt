@@ -1,0 +1,199 @@
+#include <Arduino.h>
+#include <SoftwareSerial.h>
+#include <MechaQMC5883.h> //библиотека QMC5883 для работы с датчиком QMC583, но не с HMC5883
+MechaQMC5883 qmc; //создаем объект для работы с датчиком (магнитометром), даем ему имя qmc
+
+
+#define TxD 12
+#define RxD 13
+
+#define CMD_FORWARD_A 1 
+#define CMD_FORWARD_B 2 
+
+#define IDX_CMD 0
+#define IDX_VAL 1
+
+#define BUF_SIZE 2
+
+SoftwareSerial mySerial(RxD, TxD); // RX, TX for Bluetooth
+
+byte ena = 3;
+byte in1 = 4;
+byte in2 = 5;
+byte enb = 6;
+byte in3 = 7;
+byte in4 = 8;
+
+void Forward();
+void Backward();
+void Stop();
+void Left();
+void Right();
+void ForwardA();
+void StopA();
+void ForwardB();
+void StopB();
+void BackwardA();
+void BackwardB();
+void ForwardA(int s);
+void ForwardB(int s);
+
+byte c; // get the next character from the bluetooth serial port
+byte buf[BUF_SIZE];
+
+int Speed = 150; 
+
+void setup()
+{
+  mySerial.begin(9600); // For Bluetooth
+  Serial.begin(9600); // For the IDE monitor Tools -> Serial Monitor
+  Wire.begin(); //старт связи по протоколу I2C 
+  qmc.init(); //инициализация датчика QMC5883 
+
+    pinMode(ena, OUTPUT);
+    pinMode(in1, OUTPUT);
+    pinMode(in2, OUTPUT);
+
+    pinMode(enb, OUTPUT);
+    pinMode(in3, OUTPUT);
+    pinMode(in4, OUTPUT);
+}
+void loop()
+{
+    if (mySerial.available())
+    {
+        mySerial.readBytes(buf,2);
+        Serial.print("cmd=");
+        Serial.print(buf[IDX_CMD]);
+        Serial.print(" val=");
+        Serial.print(buf[IDX_VAL]);
+        Serial.println("");
+        switch (buf[IDX_CMD])
+        {
+        case CMD_FORWARD_A:
+            if (buf[IDX_VAL]==0) StopA();
+            ForwardA(buf[IDX_VAL]);
+            break;
+        
+        case CMD_FORWARD_B:
+            if (buf[IDX_VAL]==0) StopB();
+            ForwardB(buf[IDX_VAL]);
+            break;
+        
+        default:
+            break;
+        }
+    }
+   
+  int x,y,z;
+  qmc.read(&x,&y,&z); //считываем значения X, Y и Z с датчика 
+  
+  int heading=atan2(x, y)/0.0174532925; // рассчитываем направление в градусах используя значения X и Y  
+ //преобразуем результат в диапазон от 0 до 360
+  if(heading < 0) 
+  heading+=360;
+  heading = 360-heading;
+  
+  Serial.println(heading); //передаем значение направления в последовательный порт связи для целей отладки 
+//в зависимости от значения рассчитанного направления печатаем результат (для отладки) и зажигаем соответствующий светодиод
+  mySerial.print(heading);
+  delay(500); // обновление данных каждые полсекунды 
+
+
+}
+
+void Forward()
+{
+    analogWrite(ena, Speed);
+    digitalWrite(in2, HIGH);
+    digitalWrite(in1, LOW);
+
+    analogWrite(enb, Speed);
+    digitalWrite(in4, HIGH);
+    digitalWrite(in3, LOW);
+}
+
+void Backward()
+{
+    analogWrite(ena, Speed);
+    digitalWrite(in2, LOW);
+    digitalWrite(in1, HIGH);
+
+    analogWrite(enb, Speed);
+    digitalWrite(in4, LOW);
+    digitalWrite(in3, HIGH);
+}
+void BackwardA()
+{
+    analogWrite(ena, Speed);
+    digitalWrite(in2, LOW);
+    digitalWrite(in1, HIGH);
+}
+
+void BackwardB()
+{
+    analogWrite(enb, Speed);
+    digitalWrite(in4, LOW);
+    digitalWrite(in3, HIGH);
+}
+
+void ForwardA()
+{
+    analogWrite(ena, Speed);
+    digitalWrite(in2, HIGH);
+    digitalWrite(in1, LOW);
+}
+
+void ForwardA(int s)
+{
+    analogWrite(ena, s);
+    digitalWrite(in2, HIGH);
+    digitalWrite(in1, LOW);
+}
+
+void ForwardB()
+{
+    analogWrite(enb, Speed);
+    digitalWrite(in4, HIGH);
+    digitalWrite(in3, LOW);
+}
+
+void ForwardB(int s)
+{
+    analogWrite(enb, s);
+    digitalWrite(in4, HIGH);
+    digitalWrite(in3, LOW);
+}
+
+void Stop()
+{
+    digitalWrite(in2, LOW);
+    digitalWrite(in1, LOW);
+
+    digitalWrite(in3, LOW);
+    digitalWrite(in4, LOW);
+}
+
+void StopA()
+{
+    digitalWrite(in2, LOW);
+    digitalWrite(in1, LOW);
+}
+
+void StopB()
+{
+    digitalWrite(in3, LOW);
+    digitalWrite(in4, LOW);
+}
+
+void Right()
+{
+    ForwardA();
+    BackwardB();
+}
+
+void Left()
+{
+    ForwardB();
+    BackwardA();
+}

@@ -1,0 +1,28 @@
+#include <Arduino.h>
+
+byte ena = 3;
+byte in1 = 4;
+byte in2 = 5;
+byte enb = 6;
+byte in3 = 7;
+byte in4 = 8;
+void setup() {
+    pinMode( ena, OUTPUT );
+    pinMode( in1, OUTPUT );
+    pinMode( in2, OUTPUT );
+
+
+    pinMode( enb, OUTPUT );
+    pinMode( in3, OUTPUT );
+    pinMode( in4, OUTPUT );
+}
+void loop() {
+    analogWrite( ena, 255 );
+    digitalWrite( in2, HIGH );
+    digitalWrite( in1, LOW );
+
+    analogWrite( enb, 255 );
+    digitalWrite( in4, HIGH );
+    digitalWrite( in3, LOW );
+
+}

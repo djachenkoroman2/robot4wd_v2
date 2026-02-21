@@ -1,0 +1,139 @@
+#include <Arduino.h>
+#include <SoftwareSerial.h>
+
+#define TxD 12
+#define RxD 13
+
+SoftwareSerial mySerial(RxD, TxD); // RX, TX for Bluetooth
+
+byte ena = 3;
+byte in1 = 4;
+byte in2 = 5;
+byte enb = 6;
+byte in3 = 7;
+byte in4 = 8;
+
+
+void Forward();
+void Backward();
+void Stop();
+void Left();
+void Right();
+void ForwardA();
+void StopA();
+void ForwardB();
+void StopB();
+void BackwardA();
+void BackwardB();
+
+void setup() {
+    pinMode( ena, OUTPUT );
+    pinMode( in1, OUTPUT );
+    pinMode( in2, OUTPUT );
+
+    pinMode( enb, OUTPUT );
+    pinMode( in3, OUTPUT );
+    pinMode( in4, OUTPUT );
+}
+void loop() {
+
+    // ForwardA();
+    // ForwardB();
+
+    // Backward();
+
+    // BackwardA();
+    // BackwardB();
+
+    // Right();
+
+    Left();
+
+    delay(3000);
+    Stop();
+    delay(3000);
+}
+
+void Forward()
+{
+    analogWrite( ena, 255 );
+    digitalWrite( in2, HIGH );
+    digitalWrite( in1, LOW );
+
+    analogWrite( enb, 255 );
+    digitalWrite( in4, HIGH );
+    digitalWrite( in3, LOW );
+}
+
+void Backward()
+{
+    analogWrite( ena, 255 );
+    digitalWrite( in2, LOW );
+    digitalWrite( in1, HIGH );
+
+    analogWrite( enb, 255 );
+    digitalWrite( in4, LOW );
+    digitalWrite( in3, HIGH );
+}
+void BackwardA()
+{
+    analogWrite( ena, 255 );
+    digitalWrite( in2, LOW );
+    digitalWrite( in1, HIGH );
+}
+
+void BackwardB()
+{
+    analogWrite( enb, 255 );
+    digitalWrite( in4, LOW );
+    digitalWrite( in3, HIGH );
+}
+
+
+void ForwardA()
+{
+    analogWrite( ena, 255 );
+    digitalWrite( in2, HIGH );
+    digitalWrite( in1, LOW );
+}
+
+void ForwardB()
+{
+    analogWrite( enb, 255 );
+    digitalWrite( in4, HIGH );
+    digitalWrite( in3, LOW );
+}
+
+void Stop()
+{
+    digitalWrite( in2, LOW );
+    digitalWrite( in1, LOW );
+
+    digitalWrite( in3, LOW );   
+    digitalWrite( in4, LOW );
+}
+
+void StopA()
+{
+    digitalWrite( in2, LOW );
+    digitalWrite( in1, LOW );
+}
+
+void StopB()
+{
+    digitalWrite( in3, LOW );   
+    digitalWrite( in4, LOW );
+}
+
+void Right()
+{
+    ForwardA();
+    BackwardB();
+}
+
+void Left()
+{
+    ForwardB();
+    BackwardA();
+}
+
